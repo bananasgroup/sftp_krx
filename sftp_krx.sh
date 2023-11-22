@@ -199,6 +199,10 @@ then
 		if [ ${c_minute_round_pass} -eq 30 ]
 		then
 			c_hour_new=$((${c_hour}+1))
+   			if [ ${c_hour_new} -eq 24 ]
+      			then
+				c_hour_new=00
+  			fi
 		else
 			c_hour_new=${c_hour}
 		fi
