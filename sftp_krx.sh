@@ -46,8 +46,8 @@ then
         echo $(date +%r)": Working server is HNX..."
         ip1=172.24.253.15
         ip2=172.24.253.16
-        sftp_password=xftp00014!
-        sftp_username=xftp00014
+        sftp_password=xxxxxxxx
+        sftp_username=xxxxxxxx
         total_files_download=${total_files_download_hnx}
 elif echo ${hostname} | grep "hsx"
 then
@@ -56,8 +56,8 @@ then
         echo $(date +%r)": Working server is HSX..."
         ip1=172.24.251.15
         ip2=172.24.251.16
-        sftp_password=oftp00014!
-        sftp_username=oftp00014
+        sftp_password=xxxxxxxx
+        sftp_username=xxxxxxxx
         total_files_download=${total_files_download_hsx}
 else
         echo $(date +%r)": Cannot run this script on other server. Exitting...."
@@ -67,6 +67,7 @@ echo $(date +%r)": - SFTP IP 1: ${ip1}"
 echo $(date +%r)": - SFTP IP 2: ${ip2}"
 echo $(date +%r)": - Number of file expected: ${total_files_download}"
 echo $(date +%r)": - SFTP local path: ${sftp_path}"
+echo "==========================================="
 echo ""
 
 ### REMOVE CURRENT CRON JOB
