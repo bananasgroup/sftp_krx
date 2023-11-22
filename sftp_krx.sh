@@ -17,8 +17,6 @@
 #
 
 
-echo ""
-echo ""
 echo "==========================================="
 echo "=========== KRX SFTP DOWNLOADER ==========="
 echo "==========================================="
@@ -63,6 +61,7 @@ then
         total_files_download=${total_files_download_hsx}
 else
         echo $(date +%r)": Cannot run this script on other server. Exitting...."
+	sleep 2
         exit
 fi
 echo $(date +%r)": - SFTP IP 1: ${ip1}"
