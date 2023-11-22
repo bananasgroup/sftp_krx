@@ -159,8 +159,8 @@ then
 	echo $(date +%r)": Start download file:"
 	sshpass -e sftp -oStrictHostKeyChecking=accept-new -oBatchMode=no -b - ${sftp_username}@${ip} <<-EOF
 		cd download
-#		mget ${date}/*.TXT ${folder}/
-		mget *${date}.TXT ${folder}/
+		mget ${date}/*.TXT ${folder}/
+#		mget *${date}.TXT ${folder}/
 		bye
 	EOF
 
