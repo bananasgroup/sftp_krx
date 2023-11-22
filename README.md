@@ -13,7 +13,7 @@
 	- sftp $username    
 	- sftp $password    
 	- $sftp_path  
-        - $script_path 
+	- $script_path  
     
 5. To use just adding directly to /etc/crontab file (change the path if needed):    
  _30 18 * * 1-6 root sh /opt/apps/script/sftp_krx.sh | tee -a /opt/apps/script/logs/sftp_krx.log_
