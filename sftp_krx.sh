@@ -35,7 +35,7 @@ total_files_download_hsx=10
 
 sftp_path=/opt/apps/sftp
 
-script_path=${script_path}
+script_path=/opt/apps/script
 
 hostname=$(hostname)
 
