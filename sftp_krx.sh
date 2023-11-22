@@ -68,6 +68,7 @@ echo $(date +%r)": - SFTP IP 1: ${ip1}"
 echo $(date +%r)": - SFTP IP 2: ${ip2}"
 echo $(date +%r)": - Number of file expected: ${total_files_download}"
 echo $(date +%r)": - SFTP local path: ${sftp_path}"
+echo $(date +%r)": - Script location: ${sftp_path}"
 echo ""
 
 ### REMOVE CURRENT CRON JOB
