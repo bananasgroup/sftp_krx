@@ -5,10 +5,9 @@
 #Requires:
 #	- Tested on Ubuntu 20
 #	- Script must run as root
-#	- This script must place in: /opt/apps/script/ so this path must be valid: /opt/apps/script/sftp_krx.sh
 #
 #Adding directly to /etc/crontab file:
-# 30 18 * * 1-6 root sh /opt/apps/script/sftp_krx.sh | tee -a /opt/apps/script/logs/sftp_krx.log
+# 30 18 * * 1-6 root sh ${script_path}/sftp_krx.sh | tee -a ${script_path}/logs/sftp_krx.log
 #Specific these values in SET PARAM block:
 #	hnx (ip1, ip2)
 #	hsx (ip1, ip2)
@@ -30,12 +29,15 @@ echo ""
 # Or you can declare other string to differentiate HNX and HSX server, depend on your hostname.
 # total_files_download is number of file that you downloaded everyday. script will check number of file after download and compare to this value.
 # sftp_path is woking directory path of sftp, normaly is /opt/apps/sftp (not include / at the end)
+# script_path is location of this script (not include / at the end)
 
 total_files_download_hnx=9
 
 total_files_download_hsx=10
 
 sftp_path=/opt/apps/sftp
+
+script_path=${script_path}
 
 hostname=$(hostname)
 
@@ -46,8 +48,8 @@ then
         echo $(date +%r)": Working server is HNX..."
         ip1=172.24.253.15
         ip2=172.24.253.16
-        sftp_password=xxxxxxxx
-        sftp_username=xxxxxxxx
+        sftp_password=xftp00014!
+        sftp_username=xftp00014
         total_files_download=${total_files_download_hnx}
 elif echo ${hostname} | grep "hsx"
 then
@@ -56,8 +58,8 @@ then
         echo $(date +%r)": Working server is HSX..."
         ip1=172.24.251.15
         ip2=172.24.251.16
-        sftp_password=xxxxxxxx
-        sftp_username=xxxxxxxx
+        sftp_password=oftp00014!
+        sftp_username=oftp00014
         total_files_download=${total_files_download_hsx}
 else
         echo $(date +%r)": Cannot run this script on other server. Exitting...."
@@ -67,7 +69,6 @@ echo $(date +%r)": - SFTP IP 1: ${ip1}"
 echo $(date +%r)": - SFTP IP 2: ${ip2}"
 echo $(date +%r)": - Number of file expected: ${total_files_download}"
 echo $(date +%r)": - SFTP local path: ${sftp_path}"
-echo "==========================================="
 echo ""
 
 ### REMOVE CURRENT CRON JOB
@@ -202,11 +203,11 @@ then
 			c_hour_new=${c_hour}
 		fi
 		echo "#auto_crontab_reconnect" | tee -a /etc/crontab
-		echo "${c_minute_round_fu} ${c_hour_new} * * 1-6 root sh /opt/apps/script/sftp_krx.sh | tee -a /opt/apps/script/logs/auto_crontab.log" | tee -a /etc/crontab
+		echo "${c_minute_round_fu} ${c_hour_new} * * 1-6 root sh ${script_path}/sftp_krx.sh | tee -a ${script_path}/logs/auto_crontab.log" | tee -a /etc/crontab
 		# Create log folder if not exist
-		if [ ! -d /opt/apps/script/logs ]
+		if [ ! -d ${script_path}/logs ]
 		then
-			mkdir /opt/apps/script/logs/ -p
+			mkdir ${script_path}/logs/ -p
 		fi
 	fi
 else
