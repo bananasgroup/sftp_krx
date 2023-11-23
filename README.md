@@ -1,7 +1,7 @@
 1. Script will run on both HNX and HSX server.
 2. If sever cannot connect to both SFTP server (ip 15 and 16), or connected but folder is empty, or number of files after download is not enough as expected:  
         - Auto create cron job and reconnect/redownload after every 30 minutes. These cron job will be remove if download complete.  
-        - Script will run from start (18h30 as we specify) to 8h00 next day. After that, this will stop create cron job at last run.
+        - Script will run from start (18h30 as we specify) to 7h30 next day. After that, this will stop create cron job at last run.
         - Some backup of crontab file also created in /etc (/etc/crontab.xxxx.bk), so you can remove all of this backup file with: rm /etc/crontab.*.bk
 4. Requires:    
 	- Tested on Ubuntu 20    
