@@ -191,7 +191,7 @@ fi
 
 if [ ${success} = 0 ]
 then
-	if [ ${c_hour} -ge 8 ] && [ ${c_hour} -lt 18 ]
+	if [ ${c_hour} -ge 7 ] && [ ${c_hour} -lt 18 ]
 	then
 		echo $(date +%r)": Cannot download file through SFTP. Check log file for more detail..."
 	else
