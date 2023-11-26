@@ -7,7 +7,7 @@
 #	- Script must run as root
 #
 # Adding directly to /etc/crontab file (change the path if needed):
-# 30 18 * * * root sh /opt/apps/script/sftp_krx.sh | tee -a /opt/apps/script/logs/sftp_krx.log
+# 00 20 * * * root sh /opt/apps/script/sftp_krx.sh
 # Specific these values in SET PARAM block:
 #	hnx (ip1, ip2)
 #	hsx (ip1, ip2)
