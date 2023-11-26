@@ -1,19 +1,28 @@
 #!/bin/sh
 #
-#NBH
-#Script will run on both hnx and hsx server, and hostname of these servers must contain "hnx" or "hsx%0A"
-#Requires:
+# NBH
+# Script will run on both hnx and hsx server, and hostname of these servers must contain "hnx" or "hsx%0A"
+# Requires:
 #	- Tested on Ubuntu 20
 #	- Script must run as root
 #
-#Adding directly to /etc/crontab file (change the path if needed):
-# 30 18 * * 1-6 root sh /opt/apps/script/sftp_krx.sh | tee -a /opt/apps/script/logs/sftp_krx.log
-#Specific these values in SET PARAM block:
+# Adding directly to /etc/crontab file (change the path if needed):
+# 30 18 * * * root sh /opt/apps/script/sftp_krx.sh | tee -a /opt/apps/script/logs/sftp_krx.log
+# Specific these values in SET PARAM block:
 #	hnx (ip1, ip2)
 #	hsx (ip1, ip2)
 #	sftp username
 #	sftp password
 #	sftp_path
+#
+# You can search and change all value with tag ###Changeable
+#
+# Success code:
+# 	1  - success and do next task
+# 	0  - failed -> create crontab to try again after 30 minutes
+# 	-1 - exit
+#
+# Comment out Email or Telegram block at the end for sending output via email or telegram api.
 #
 
 OUTPUT=""
@@ -22,12 +31,15 @@ OUTPUT=${OUTPUT}"=========== KRX SFTP DOWNLOADER ===========%0A"
 OUTPUT=${OUTPUT}"===========================================%0A"
 OUTPUT=${OUTPUT}"%0A"
 
+### Prepare some varibles
+c_hour=$(date +%H)
+c_minute=$(date +%M)
+c_dow=$(date +%u)
+success=1
 
 ### LOCALE
 # We recommend that system date format is set to 24 hours
 #
-c_hour=$(date +%H)
-c_minute=$(date +%M)
 
 if ! grep -q "LC_TIME=\"C.UTF-8\"" /etc/default/locale
 then
@@ -36,6 +48,32 @@ then
 	OUTPUT=${OUTPUT}"LC_TIME=\"C.UTF-8\"" | tee -a /etc/default/locale
 fi
 OUTPUT=${OUTPUT}"%0A"
+
+### SET WEEKEND
+# Script will not run if weekend (Day of week are 6-Sat and 7-Sun).
+#
+if [ ${c_dow} -gt 5 ]
+then
+	if [ ${c_dow} -eq 6 ] && grep -q "auto_crontab_download" /etc/crontab
+	then
+		success=1
+	else
+		OUTPUT=${OUTPUT}$(date +%T)": Weekend: $(date +%a)...%0A"
+		OUTPUT=${OUTPUT}$(date +%T)": Not run in weekend...%0A"
+		success=-1
+	fi
+fi
+
+### SET DATE
+# SFTP date is running date. If running after 00h00, sftp date is yesterday
+#
+if [ ${c_hour} -ge 0 ] && [ ${c_hour} -le 8 ]
+then
+	date=$(date -d '-1 day' '+%Y%m%d')
+else
+	date=$(date '+%Y%m%d')
+fi
+
 
 ### SET PARAM
 # We check working server base on server hostname. So hostname must content "hnx" or "hsx" to continue this script.
@@ -51,7 +89,6 @@ script_path=/opt/apps/script 		###Changeable
 logs_path=/opt/apps/script/logs 	###Changeable
 
 hostname=$(hostname)
-success=1
 
 if [ ${success} = 1 ]
 then
@@ -76,23 +113,41 @@ then
 	        sftp_username=oftp00014 	###Changeable
 	        total_files_download=${total_files_download_hsx}
 	else
-	        OUTPUT=${OUTPUT}$(date +%T)": Cannot run this script on other server. Exitting....%0A"
+	        OUTPUT=${OUTPUT}$(date +%T)": Cannot run this script on this server: ${hostname}...%0A"
 		success=-1
 	fi
 
 	OUTPUT=${OUTPUT}"%0A"
 	OUTPUT=${OUTPUT}$(date +%T)": - SFTP IP 1: ${ip1}%0A"
 	OUTPUT=${OUTPUT}$(date +%T)": - SFTP IP 2: ${ip2}%0A"
+	OUTPUT=${OUTPUT}$(date +%T)": - SFTP date: ${date}%0A"
 	OUTPUT=${OUTPUT}$(date +%T)": - Number of file expected: ${total_files_download}%0A"
 	OUTPUT=${OUTPUT}$(date +%T)": - SFTP local path: ${sftp_path}%0A"
 	OUTPUT=${OUTPUT}$(date +%T)": - Script location: ${sftp_path}%0A"
+	OUTPUT=${OUTPUT}$(date +%T)": - Logs location: ${logs_path}%0A"
 	OUTPUT=${OUTPUT}"%0A"
 fi
 
+
+### ========== ###
+### ========== ###
+# Uncomment following 2 lines, and manual run this script (not in protect time you set above) to print all param to stdout and re-check if needed.
+# This action does not make any effect to MDDS date.
+# Manual run by this command: sudo sh krx.bod.sh
+#
+#echo ${OUTPUT} | sed -r 's/%0A/\n/g' 	#uncomment this
+#exit 	#uncomment this
+#
+### ========== ###
+### ========== ###
+
+
 ### REMOVE CURRENT CRON JOB
-# Get current time: hour and minute for cron
+# Get current time: hour and minute for cron.
 # Round minute for crontab. We just create and check crontab at every 30 minutes.
-# check if system date format is 24 hours
+# check if system date format is 24 hours.
+# c_minute_round_fu use for creating next cron job.
+#
 
 if [ ${c_minute} -ge 30 ]
 then
@@ -146,14 +201,7 @@ OUTPUT=${OUTPUT}"%0A"
 ### DOWNLOAD FILES
 # Download files first even files are exist or not.
 # We download files first, then check if files are exist or not later.
-# If Script delay till next day, set date to last date
-
-if [ ${c_hour} -ge 0 ] && [ ${c_hour} -le 8 ]
-then
-	date=$(date -d '-1 day' '+%Y%m%d')
-else
-	date=$(date '+%Y%m%d')
-fi
+#
 
 if [ ${success} = 1 ]
 then
@@ -188,8 +236,9 @@ OUTPUT=${OUTPUT}"%0A"
 
 ### CHECK FILES EXIST
 # If files are not exist, add crontab to redownload later.
-# We also check if total files after download are less then ${total_files_download}
-# If you dont want to redownload, just add comment out these lines by adding # at every first line.
+# We also check if total files after download are less then ${total_files_download}.
+# If you dont want to redownload, just change success to 1 (success=1).
+#
 if [ ${success} = 1 ]
 then
 	numfile=$(ls ${folder} | wc -l)
@@ -202,9 +251,9 @@ then
 fi
 
 ### GENERATE NEW CRONTAB
-# Create new crontab if all above checks are failed
+# Create new crontab if all above checks are failed.
 # Last cron job will be created at 7h30 AM everydat. After that, this loop will be stopped even files are downloaded or not.
-
+#
 if [ ${success} = 0 ]
 then
 	if [ ${c_hour} -ge 7 ] && [ ${c_hour} -lt 18 ]
@@ -241,20 +290,62 @@ OUTPUT=${OUTPUT}"%0A"
 
 
 ### OUTPUT SETTING
+#
+# Telegram
+# Uncomment these lines for sending all output to Telegram
+#
+echo $(date +%T)": Send Telegram notification...."
+
+CHAT_TOKEN="1780537418:AAH-2vpNHEjX4M7DvNTHhvMj1jzaw5pzb9w"
+CHAT_ID="-463661337"
+curl -s -X POST https://api.telegram.org/bot$CHAT_TOKEN/sendMessage -d chat_id=$CHAT_ID -d text="$OUTPUT" > /dev/null
+
+# Email
+# 
+# Uncomment these lines for sending all output via Email
+# We use muttutil for sendding email
+# Install by: apt update -y && apt install -y mutt
+# Or download at: http://www.mutt.org/download.html
+#
+# Config Mutt by add these line to /etc/Muttrc:
+# set smtp_url = "smtp[s]://mail@mail.com:password@mail_server:port"
+# set from='mail@mail.com'
+# set realname='KRX Notification'
+#
+# Test send mail by: echo "test" | mutt -s "Subject" -- recipients@mail.com 
+# Multiple recipients seprate by comma: a@mail.com,b@mail.com
+#
+echo $(date +%T)": Send email notification...."
+
+mailto=it@dag.vn
+subject="[KRX] SFTP download job notification"
+
+checkmutt=$(mutt -version > /dev/null)
+if echo ${checkmutt} | grep "Command 'mutt' not found"
+then
+	OUTPUT=${OUTPUT}"%0A"
+	OUTPUT=${OUTPUT}$(date +%T)": Mutt Util is not installed on your server. Cannot send email....%0A"
+	OUTPUT=${OUTPUT}"%0A"
+else
+	echo ${OUTPUT} | sed -r 's/%0A/\n/g' | mutt -s "${subject}" -- ${mailto}
+fi
+
+
+## Write log file
 # Defaul is output to log file
 # Optional is send message to telegram or email.
 # Create logs folder if not exist
 #
 if [ ! -d ${logs_path} ]
 then
+	OUTPUT=${OUTPUT}"%0A"
+	OUTPUT=${OUTPUT}$(date +%T)": Logs folder is not exist. Create logs folder....%0A"
 	mkdir ${logs_path} -p
 fi
 
-echo ${OUTPUT} | sed -r 's/%0A/\n/g' | tee -a ${logs_path}/krx.sftp.log
+echo ${OUTPUT} | sed -r 's/%0A/\n/g' | tee -a ${logs_path}/krx.bod.log
 
-# Telegram
-CHAT_TOKEN=""
-CHAT_ID=""
-curl -s -X POST https://api.telegram.org/bot$CHAT_TOKEN/sendMessage -d chat_id=$CHAT_ID -d text="$OUTPUT" > /dev/null
 
-# Email
+
+
+
