@@ -294,15 +294,14 @@ OUTPUT=${OUTPUT}"%0A"
 # Telegram
 # Uncomment these lines for sending all output to Telegram
 #
-echo $(date +%T)": Send Telegram notification...."
+#echo $(date +%T)": Send Telegram notification...."
 
-CHAT_TOKEN="1780537418:AAH-2vpNHEjX4M7DvNTHhvMj1jzaw5pzb9w"
-CHAT_ID="-463661337"
-curl -s -X POST https://api.telegram.org/bot$CHAT_TOKEN/sendMessage -d chat_id=$CHAT_ID -d text="$OUTPUT" > /dev/null
+#CHAT_TOKEN=""
+#CHAT_ID=""
+#curl -s -X POST https://api.telegram.org/bot$CHAT_TOKEN/sendMessage -d chat_id=$CHAT_ID -d text="$OUTPUT" > /dev/null
 
 # Email
 # 
-# Uncomment these lines for sending all output via Email
 # We use muttutil for sendding email
 # Install by: apt update -y && apt install -y mutt
 # Or download at: http://www.mutt.org/download.html
@@ -315,20 +314,22 @@ curl -s -X POST https://api.telegram.org/bot$CHAT_TOKEN/sendMessage -d chat_id=$
 # Test send mail by: echo "test" | mutt -s "Subject" -- recipients@mail.com 
 # Multiple recipients seprate by comma: a@mail.com,b@mail.com
 #
-echo $(date +%T)": Send email notification...."
+# Uncomment these lines for sending all output via Email
+#
+#echo $(date +%T)": Send email notification...."
 
-mailto=it@dag.vn
-subject="[KRX] SFTP download job notification"
+#mailto=
+#subject="[KRX] SFTP download job notification"
 
-checkmutt=$(mutt -version > /dev/null)
-if echo ${checkmutt} | grep "Command 'mutt' not found"
-then
-	OUTPUT=${OUTPUT}"%0A"
-	OUTPUT=${OUTPUT}$(date +%T)": Mutt Util is not installed on your server. Cannot send email....%0A"
-	OUTPUT=${OUTPUT}"%0A"
-else
-	echo ${OUTPUT} | sed -r 's/%0A/\n/g' | mutt -s "${subject}" -- ${mailto}
-fi
+#checkmutt=$(mutt -version > /dev/null)
+#if echo ${checkmutt} | grep "Command 'mutt' not found"
+#then
+#	OUTPUT=${OUTPUT}"%0A"
+#	OUTPUT=${OUTPUT}$(date +%T)": Mutt Util is not installed on your server. Cannot send email....%0A"
+#	OUTPUT=${OUTPUT}"%0A"
+#else
+#	echo ${OUTPUT} | sed -r 's/%0A/\n/g' | mutt -s "${subject}" -- ${mailto}
+#fi
 
 
 ## Write log file
