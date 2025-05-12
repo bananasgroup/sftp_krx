@@ -27,7 +27,7 @@ curl -s -X POST https://api.telegram.org/bot$CHAT_TOKEN/sendMessage -d chat_id=$
 - Install mutt by: apt update -y && apt install -y mutt  
 - Config mutt (global config for all user) by add these lines at the end of /etc/Muttrc:  
 _set smtp_url = "smtps://mail@example.com:password@mail.example.com:465"  
-set from='krx.notification@dag.vn'  
+set from='krx.notification@example.com'  
 set realname='KRX Notification'_
   
 - Uncomment these lines, fill mailto:  
